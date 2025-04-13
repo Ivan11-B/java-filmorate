@@ -31,8 +31,7 @@ public class FilmService {
     }
 
     public Film getFilmById(Long id) {
-        return filmStorage.getFilmById(id).
-                orElseThrow(() -> new FilmNotFoundException("Фильм не найден"));
+        return filmStorage.getFilmById(id).orElseThrow(() -> new FilmNotFoundException("Фильм не найден"));
     }
 
     public void addLike(Long id, Long userId) {

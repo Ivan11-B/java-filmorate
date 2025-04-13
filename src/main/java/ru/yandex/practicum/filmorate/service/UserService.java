@@ -28,8 +28,7 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userStorage.getUserById(id).
-                orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        return userStorage.getUserById(id).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
     }
 
     public void addInFriends(Long id, Long friendId) {
