@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -25,36 +23,22 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film newFilm) {
-        if (newFilm.getId() == null) {
-            throw new ValidationException("Id должен быть указан");
-        }
-        if (films.containsKey(newFilm.getId())) {
-            films.put(newFilm.getId(), newFilm);
-            return newFilm;
-        }
-        throw new FilmNotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
+        films.put(newFilm.getId(), newFilm);
+        return newFilm;
     }
 
     @Override
     public Optional<Film> getFilmById(Long id) {
-        return films.values().stream()
-                .filter(film -> Objects.equals(film.getId(), id))
-                .findFirst();
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
     public void addLike(Long id, Long userId) {
-        if (!checkId(id)) {
-            throw new FilmNotFoundException("Film с id = " + id + " не найден");
-        }
         films.get(id).getLikes().add(userId);
     }
 
     @Override
     public void deleteLike(Long id, Long userId) {
-        if (!checkId(id)) {
-            throw new FilmNotFoundException("Film с id = " + id + " не найден");
-        }
         films.get(id).getLikes().remove(userId);
     }
 
@@ -73,9 +57,5 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .max()
                 .orElse(0);
         return ++currentMaxId;
-    }
-
-    private boolean checkId(Long id) {
-        return films.containsKey(id);
     }
 }

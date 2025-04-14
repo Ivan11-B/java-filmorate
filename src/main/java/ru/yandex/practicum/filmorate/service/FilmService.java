@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -26,29 +28,37 @@ public class FilmService {
     }
 
     public Film update(Film newFilm) {
+        if (newFilm.getId() == null) {
+            throw new ValidationException("Id должен быть указан");
+        }
+        getFilmById(newFilm.getId());
         filmStorage.update(newFilm);
         return newFilm;
     }
 
     public Film getFilmById(Long id) {
-        return filmStorage.getFilmById(id).orElseThrow(() -> new FilmNotFoundException("Фильм не найден"));
+        return filmStorage.getFilmById(id)
+                .orElseThrow(() -> new FilmNotFoundException("Фильм с id = " + id + " не найден"));
     }
 
     public void addLike(Long id, Long userId) {
-        if (!userStorage.checkId(userId)) {
-            throw new UserNotFoundException("User с id = " + id + " не найден");
-        }
+        checkUserById(userId);
+        getFilmById(id);
         filmStorage.addLike(id, userId);
     }
 
     public void deleteLike(Long id, Long userId) {
-        if (!userStorage.checkId(userId)) {
-            throw new UserNotFoundException("User с id = " + id + " не найден");
-        }
+        checkUserById(userId);
+        getFilmById(id);
         filmStorage.deleteLike(id, userId);
     }
 
     public Collection<Film> findPopularList(Long count) {
         return filmStorage.getPopularFilms(count);
+    }
+
+    private User checkUserById(Long id) {
+        return userStorage.getUserById(id)
+                .orElseThrow(() -> new UserNotFoundException("User с id = " + id + " не найден"));
     }
 }
