@@ -42,13 +42,13 @@ public class FilmService {
     }
 
     public void addLike(Long id, Long userId) {
-        checkUserById(userId);
+        getUserById(userId);
         getFilmById(id);
         filmStorage.addLike(id, userId);
     }
 
     public void deleteLike(Long id, Long userId) {
-        checkUserById(userId);
+        getUserById(userId);
         getFilmById(id);
         filmStorage.deleteLike(id, userId);
     }
@@ -57,7 +57,7 @@ public class FilmService {
         return filmStorage.getPopularFilms(count);
     }
 
-    private User checkUserById(Long id) {
+    private User getUserById(Long id) {
         return userStorage.getUserById(id)
                 .orElseThrow(() -> new UserNotFoundException("User с id = " + id + " не найден"));
     }
