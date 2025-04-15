@@ -9,6 +9,8 @@ import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.filmorate.validator.MinDate;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -17,6 +19,7 @@ import java.time.LocalDate;
 @Builder
 public class Film {
     private Long id;
+    private final Set<Long> likes = new HashSet<>();
 
     @NotBlank(message = "Название не может быть пустым")
     private String name;

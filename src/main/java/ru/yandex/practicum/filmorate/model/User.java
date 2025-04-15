@@ -9,12 +9,15 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
 public class User {
     private Long id;
     private String name;
+    private final Set<Long> friends = new HashSet<>();
 
     @NotBlank(message = "Поле login не должно быть пустым" + "\n")
     @Pattern(message = "В поле login не должны быть пробелы" + "\n", regexp = "^[0-9A-Za-z]{6,16}$")
