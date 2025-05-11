@@ -26,9 +26,6 @@ public class FilmDbStorage implements FilmStorage {
     private final FilmMapper filmMapper;
     private final GenreMapper genreMapper;
     private final MpaMapper mpaMapper;
-    private final FilmResultExtractor filmResultExtractor;
-    private final FilmResultSetExtractor filmResultSetExtractor;
-
 
     private static final String QUERY_ALL_FILMS =
             "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS mpa_name, g.genre_id, g.name AS genre_name " +
@@ -49,13 +46,11 @@ public class FilmDbStorage implements FilmStorage {
 
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmMapper filmMapper, GenreMapper genreMapper, MpaMapper mpaMapper, FilmResultExtractor filmResultExtractor, FilmResultSetExtractor filmResultSetExtractor) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmMapper filmMapper, GenreMapper genreMapper, MpaMapper mpaMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmMapper = filmMapper;
         this.genreMapper = genreMapper;
         this.mpaMapper = mpaMapper;
-        this.filmResultExtractor = filmResultExtractor;
-        this.filmResultSetExtractor = filmResultSetExtractor;
     }
 
     @Override
@@ -79,7 +74,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findAll() {
-        return jdbcTemplate.query(QUERY_ALL_FILMS, filmResultSetExtractor);
+        return jdbcTemplate.query(QUERY_ALL_FILMS, new FilmResultSetExtractor());
     }
 
     @Override
@@ -96,7 +91,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Optional<Film> getFilmById(Long id) {
 
-        return Optional.of(jdbcTemplate.query(QUERY_FILM, filmResultExtractor, id));
+        return Optional.of(jdbcTemplate.query(QUERY_FILM, new FilmResultExtractor(), id));
     }
 
     @Override

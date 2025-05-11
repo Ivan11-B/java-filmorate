@@ -9,7 +9,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
-import ru.yandex.practicum.filmorate.storage.mapper.UserResultSetExtractor;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -26,7 +25,7 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final UserMapper userMapper;
-    private final UserResultSetExtractor userResultSetExtractor;
+
 
     private static final String QUERY_ALL_USERS =
             "SELECT u.user_id, u.name, u.login, u.email, u.birthday, STRING_AGG(f.friend_id::TEXT, ', ') AS friends_list " +
@@ -43,10 +42,9 @@ public class UserDbStorage implements UserStorage {
 
 
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate, UserMapper userMapper, UserResultSetExtractor userResultSetExtractor) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, UserMapper userMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.userMapper = userMapper;
-        this.userResultSetExtractor = userResultSetExtractor;
     }
 
     @Override
