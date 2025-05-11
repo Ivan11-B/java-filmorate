@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -20,4 +22,14 @@ public interface FilmStorage {
     void deleteLike(Long id, Long userId);
 
     Collection<Film> getPopularFilms(Long count);
+
+    Optional<Genre> getGenreById(int id);
+
+    Collection<Film> getFilmsWithGenres();
+
+    Optional<Mpa> getMpaById(int id);
+
+    Collection<Genre> findAllGenre();
+
+    Collection<Mpa> findAllMpa();
 }

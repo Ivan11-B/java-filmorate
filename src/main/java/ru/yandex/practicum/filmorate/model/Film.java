@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.validator.MinDate;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,4 +34,8 @@ public class Film {
 
     @Positive
     private Integer duration;
+
+    private Set<Genre> genres;
+
+    private Mpa mpa;
 }
