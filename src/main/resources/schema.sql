@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS films (
     duration INTEGER NOT NULL CHECK (duration > 0),
     release_date DATE NOT NULL,
     mpa_id varchar(50) REFERENCES mpa (mpa_id)
---     genre_id varchar(50) REFERENCES genres (genre_id)
 );
 
 

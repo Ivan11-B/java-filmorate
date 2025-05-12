@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Set;
 
 @Component
 public class FilmResultExtractor implements ResultSetExtractor<Film> {
@@ -18,7 +17,6 @@ public class FilmResultExtractor implements ResultSetExtractor<Film> {
     public Film extractData(ResultSet rs) throws SQLException, DataAccessException {
 
         Film film = null;
-        Set<Genre> genres = new HashSet<>();
 
         while (rs.next()) {
             if (film == null) {

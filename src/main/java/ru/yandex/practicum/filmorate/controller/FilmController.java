@@ -59,10 +59,4 @@ public class FilmController {
         log.info("ID={} популярных фильмов предоставлен", count);
         return filmService.findPopularList(count);
     }
-
-    @GetMapping("/genres")
-    public Collection<Film> getFilmsWithGenres() {
-        log.info("Фильмы c жанрами");
-        return filmService.findFilmsWithGenres();
-    }
 }

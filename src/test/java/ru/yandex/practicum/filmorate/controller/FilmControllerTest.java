@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -16,9 +18,11 @@ import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class FilmControllerTest {
-    FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
+    FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage(),
+            mock(GenreStorage.class), mock(MpaStorage.class)));
     Film film;
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 

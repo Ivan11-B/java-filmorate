@@ -2,14 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -21,6 +20,8 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final GenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
 
     public Collection<Film> findAll() {
         return filmStorage.findAll();
@@ -31,7 +32,8 @@ public class FilmService {
             checkGenre(film);
         }
         if (!(film.getMpa() == null)) {
-            getMpaById(film.getMpa().getId());
+            mpaStorage.getMpaById(film.getMpa().getId())
+                    .orElseThrow(() -> new MpaNotFoundException("Рейтинг с id = " + film.getMpa().getId() + " не найден"));
         }
         filmStorage.add(film);
         return film;
@@ -40,7 +42,8 @@ public class FilmService {
     private void checkGenre(Film film) {
         Set<Genre> genres = film.getGenres();
         for (Genre genre : genres) {
-            getGenreById(genre.getId());
+            genreStorage.getGenreById(genre.getId())
+                    .orElseThrow(() -> new GenreNotFoundException("Жанр с id = " + genre.getId() + " не найден"));
         }
     }
 
@@ -77,27 +80,5 @@ public class FilmService {
     private User getUserById(Long id) {
         return userStorage.getUserById(id)
                 .orElseThrow(() -> new UserNotFoundException("User с id = " + id + " не найден"));
-    }
-
-    public Collection<Film> findFilmsWithGenres() {
-        return filmStorage.getFilmsWithGenres();
-    }
-
-    public Genre getGenreById(int id) {
-        return filmStorage.getGenreById(id)
-                .orElseThrow(() -> new FilmNotFoundException("Жанр с id = " + id + " не найден"));
-    }
-
-    public Collection<Genre> findAllGenre() {
-        return filmStorage.findAllGenre();
-    }
-
-    public Mpa getMpaById(int id) {
-        return filmStorage.getMpaById(id)
-                .orElseThrow(() -> new FilmNotFoundException("Рейтинг с id = " + id + " не найден"));
-    }
-
-    public Collection<Mpa> findAllMpa() {
-        return filmStorage.findAllMpa();
     }
 }

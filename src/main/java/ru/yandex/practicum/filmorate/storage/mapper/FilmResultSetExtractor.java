@@ -28,8 +28,8 @@ public class FilmResultSetExtractor implements ResultSetExtractor<List<Film>> {
                             .description(rs.getString("description"))
                             .releaseDate(rs.getDate("release_date").toLocalDate())
                             .duration(rs.getInt("duration"))
-                            .genres(new HashSet<>())  // Инициализируем пустой Set
-                            .mpa(null)  // Временное значение
+                            .genres(new HashSet<>())
+                            .mpa(null)
                             .build();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);

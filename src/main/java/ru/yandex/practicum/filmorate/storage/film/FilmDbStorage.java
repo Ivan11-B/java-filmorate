@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -10,13 +9,12 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.mapper.*;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmAllMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmResultExtractor;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 
 @Repository
@@ -24,16 +22,7 @@ import java.util.*;
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final FilmMapper filmMapper;
-    private final GenreMapper genreMapper;
-    private final MpaMapper mpaMapper;
-
-    private static final String QUERY_ALL_FILMS =
-            "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS mpa_name, g.genre_id, g.name AS genre_name " +
-                    "FROM films f " +
-                    "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                    "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
-                    "LEFT JOIN genres g ON fg.genre_id = g.genre_id " +
-                    "GROUP BY f.film_id, f.name, f.description, f.release_date, f.duration, f.mpa_id, g.genre_id ";
+    private final FilmAllMapper filmAllMapper;
 
     private static final String QUERY_FILM =
             "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS mpa_name, g.genre_id, g.name AS genre_name " +
@@ -41,16 +30,13 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN mpa m ON f.mpa_id = m.mpa_id " +
                     "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
                     "LEFT JOIN genres g ON fg.genre_id = g.genre_id " +
-                    "WHERE f.film_id = ? " +
-                    "GROUP BY f.film_id, f.name, f.description, f.release_date, f.duration, f.mpa_id, g.genre_id ";
-
+                    "WHERE f.film_id = ? ";
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmMapper filmMapper, GenreMapper genreMapper, MpaMapper mpaMapper) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmMapper filmMapper, FilmAllMapper filmAllMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmMapper = filmMapper;
-        this.genreMapper = genreMapper;
-        this.mpaMapper = mpaMapper;
+        this.filmAllMapper = filmAllMapper;
     }
 
     @Override
@@ -63,7 +49,11 @@ public class FilmDbStorage implements FilmStorage {
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setInt(4, film.getDuration());
-            ps.setInt(5, film.getMpa().getId());
+            if (film.getMpa() != null) {
+                ps.setInt(5, film.getMpa().getId());
+            } else {
+                ps.setNull(5, Types.INTEGER);
+            }
             return ps;
         }, keyHolder);
         long filmId = keyHolder.getKey().longValue();
@@ -74,7 +64,26 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findAll() {
-        return jdbcTemplate.query(QUERY_ALL_FILMS, new FilmResultSetExtractor());
+        String query = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS mpa_name " +
+                "FROM films AS f LEFT JOIN mpa AS m ON f.mpa_id = m.mpa_id";
+        List<Film> films = jdbcTemplate.query(query, filmAllMapper);
+
+        query = "SELECT fg.film_id, g.* FROM film_genre AS fg JOIN genres AS g ON fg.genre_id = g.genre_id";
+        Map<Long, List<Genre>> filmGenres = jdbcTemplate.query(query, rs -> {
+            Map<Long, List<Genre>> genres = new HashMap<>();
+            while (rs.next()) {
+                Long filmId = rs.getLong("film_id");
+                genres.computeIfAbsent(filmId, k -> new ArrayList<>())
+                        .add(Genre.builder()
+                                .id(rs.getInt("genre_id"))
+                                .name(rs.getString("name"))
+                                .build());
+            }
+            return genres;
+        });
+        films.forEach(film ->
+                film.setGenres(new HashSet<>((filmGenres.getOrDefault(film.getId(), List.of())))));
+        return films;
     }
 
     @Override
@@ -115,41 +124,6 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY likes_count DESC " +
                 "LIMIT ?";
         return jdbcTemplate.query(query, filmMapper, count);
-    }
-
-    @Override
-    public Optional<Genre> getGenreById(int id) {
-        try {
-            String query = "SELECT * FROM genres WHERE genre_id=?";
-            return Optional.of(jdbcTemplate.queryForObject(query, genreMapper, id));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Collection<Film> getFilmsWithGenres() {
-        return null;
-    }
-
-    @Override
-    public Optional<Mpa> getMpaById(int id) {
-        try {
-            String query = "SELECT * FROM mpa WHERE mpa_id=?";
-            return Optional.of(jdbcTemplate.queryForObject(query, mpaMapper, id));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Collection<Genre> findAllGenre() {
-        return jdbcTemplate.query("SELECT * FROM Genres ORDER BY genre_id ASC", genreMapper);
-    }
-
-    @Override
-    public Collection<Mpa> findAllMpa() {
-        return jdbcTemplate.query("SELECT * FROM mpa ORDER BY mpa_id ASC", mpaMapper);
     }
 
     private void addGenreToFilm(Film film) {

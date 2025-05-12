@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmAllMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.MpaMapper;
@@ -21,7 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Import({FilmDbStorage.class, FilmMapper.class, GenreMapper.class, MpaMapper.class})
+@Import({FilmDbStorage.class, FilmMapper.class, GenreMapper.class, MpaMapper.class, FilmAllMapper.class})
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:schema.sql")
 @Sql(scripts = "classpath:test-data.sql")
