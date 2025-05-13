@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  sql:
+    init:
+      mode: always
+  datasource:
+    url: jdbc:h2:mem:filmorate_tdb;DB_CLOSE_DELAY=-1;MODE=PostreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+

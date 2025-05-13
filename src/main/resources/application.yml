@@ -1,0 +1,19 @@
+spring:
+  h2:
+    console:
+      enabled: true
+    sql:
+      init:
+        mode: always
+    datasource:
+      url: jdbc:h2:./db/filmorate
+      driver-class-name: org.h2.Driver
+      username: sa
+      password: password
+
+ru:
+  yandex:
+    practicum:
+      filmorate:
+        settings:
+          greeting: 'LOCAL'

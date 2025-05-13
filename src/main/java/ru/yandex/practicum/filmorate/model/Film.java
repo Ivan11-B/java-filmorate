@@ -33,4 +33,8 @@ public class Film {
 
     @Positive
     private Integer duration;
+
+    private Set<Genre> genres;
+
+    private Mpa mpa;
 }
